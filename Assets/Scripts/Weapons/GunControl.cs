@@ -12,12 +12,18 @@ public class GunControl : WeaponController
 
     protected override void Attack()
     {
-        
+
         base.Attack();
-        Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        mousePosition.z = 0f;
+
+        // Calculate the direction the player is facing
+        Vector3 facingDirection = transform.right; // Assuming 'right' is the facing direction of the player
+        facingDirection.z = 0f;
+
+        // Instantiate bullet
         GameObject spawnedBullet = Instantiate(wpData.prefab);
-        spawnedBullet.transform.position = transform.position; //Assign the position to be the same as this object which is parented to the player
-        spawnedBullet.GetComponent<GunBehaviour>().DirectionChecker(pm.lastMoveVector); //Refrence and set the diretion
+        spawnedBullet.transform.position = transform.position; // Set bullet spawn position to player's position
+
+        // Set bullet direction based on player's facing direction
+        spawnedBullet.GetComponent<GunBehaviour>().DirectionChecker(facingDirection.normalized);
     }
 }

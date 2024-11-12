@@ -5,6 +5,19 @@ using UnityEngine;
 public class Playermovement : MonoBehaviour
 {
     //movement
+    private float horizontal;
+    public float vanToc = 5.0f;
+    private AudioSource _audioSource;
+    private SpriteRenderer _spriteRenderer;
+    private Animator _animator;
+    private bool isFacingRight = true;
+    [SerializeField]
+    private GameObject BulletPrefab;
+
+    public float lucNhay = 5f;
+    [SerializeField] private Rigidbody2D rb2D;
+    private bool isGround = false;
+
     public float moveSpeed;
     Rigidbody2D rb;
     [HideInInspector]
@@ -22,46 +35,67 @@ public class Playermovement : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         lastMoveVector = new Vector2(1, 0f);
+        _animator = GetComponent<Animator>();
+        _spriteRenderer = GetComponent<SpriteRenderer>();
+        _audioSource = GetComponent<AudioSource>();
+        
     }
 
     // Update is called once per frame
     void Update()
     {
         InputManagement();
-        
-    }
 
-    void FixedUpdate()
-    {
-        Move();
     }
 
     void InputManagement()
     {
-        float moveX = Input.GetAxisRaw("Horizontal");
-        float moveY = Input.GetAxisRaw("Vertical");
-        
-        moveDir = new Vector2(moveX, moveY).normalized;
+        horizontal = Input.GetAxisRaw("Horizontal");
+        if (horizontal > 0)
+        {
+            _spriteRenderer.flipX = false;
+            _animator.SetBool("IsWalking", true);
+            isFacingRight = true;
+        }
+        else if (horizontal < 0)
+        {
+            _spriteRenderer.flipX = true;
+            _animator.SetBool("IsWalking", true);
+            isFacingRight = false;
+        }
+        else
+        {
+            _animator.SetBool("IsWalking", false);
+        }
+        if (Input.GetKeyDown(KeyCode.Space) && isGround)
+        {
+            rb2D.AddForce(Vector2.up * lucNhay, ForceMode2D.Impulse);
+        }
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            //vi tri tao vien dan
+            Vector2 spwamPosition = transform.position;
+            //van toc vien dan
+            float bulletSpeed = 50f;
+            if (isFacingRight)
+            {
+                spwamPosition += new Vector2(1, 0);
+                bulletSpeed = 50;
+            }
+            else
+            {
+                spwamPosition += new Vector2(-1, 0);
+                bulletSpeed = -50;
+            }
+
+            GameObject Bullet = Instantiate(BulletPrefab,
+                                spwamPosition, Quaternion.identity);
+            //lay component bomb
+            Bullet bulletComponent = Bullet.GetComponent<Bullet>();
+
+            bulletComponent.setSpeed(bulletSpeed);
+        }
 
 
-        if (moveDir.x != 0)
-        {
-            lastHorizontalVector = moveDir.x;
-            lastMoveVector = new Vector2(lastHorizontalVector, 0f);
-        }
-        if (moveDir.y != 0)
-        {
-            lastVerticalVector = moveDir.y;
-            lastMoveVector = new Vector2(0f, lastVerticalVector);
-        }
-        if (moveDir.x != 0 && moveDir.y != 0)
-        {
-            lastMoveVector = new Vector2(lastHorizontalVector, lastVerticalVector);
-        }
-    }
-
-    void Move()
-    {
-        rb.velocity = new Vector2(moveDir.x * moveSpeed, moveDir.y * moveSpeed);
     }
 }
