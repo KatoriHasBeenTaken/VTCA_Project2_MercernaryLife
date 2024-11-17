@@ -28,6 +28,8 @@ public class Playermovement : MonoBehaviour
     public Vector2 moveDir;
     [HideInInspector]
     public Vector2 lastMoveVector;
+    //Healthbar update
+    [SerializeField] private float health = 30f;
 
 
     // Start is called before the first frame update
@@ -38,75 +40,63 @@ public class Playermovement : MonoBehaviour
         _animator = GetComponent<Animator>();
         _spriteRenderer = GetComponent<SpriteRenderer>();
         _audioSource = GetComponent<AudioSource>();
-        
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        InputManagement();
-        if (playerInRange && Input.GetKeyDown(KeyCode.E))
+
+
+        void InputManagement()
         {
-            DialogueManager dialogueManager = FindObjectOfType<DialogueManager>();
-            if (dialogueManager.dialogueBox.activeSelf)
+            horizontal = Input.GetAxisRaw("Horizontal");
+            if (horizontal > 0)
             {
-                dialogueManager.DisplayNextSentence(); // Advance dialogue
+                _spriteRenderer.flipX = false;
+                _animator.SetBool("IsWalking", true);
+                isFacingRight = true;
+            }
+            else if (horizontal < 0)
+            {
+                _spriteRenderer.flipX = true;
+                _animator.SetBool("IsWalking", true);
+                isFacingRight = false;
             }
             else
             {
-                GiveQuest();
+                _animator.SetBool("IsWalking", false);
             }
-        
-        }
-
-    void InputManagement()
-    {
-        horizontal = Input.GetAxisRaw("Horizontal");
-        if (horizontal > 0)
-        {
-            _spriteRenderer.flipX = false;
-            _animator.SetBool("IsWalking", true);
-            isFacingRight = true;
-        }
-        else if (horizontal < 0)
-        {
-            _spriteRenderer.flipX = true;
-            _animator.SetBool("IsWalking", true);
-            isFacingRight = false;
-        }
-        else
-        {
-            _animator.SetBool("IsWalking", false);
-        }
-        if (Input.GetKeyDown(KeyCode.Space) && isGround)
-        {
-            rb2D.AddForce(Vector2.up * lucNhay, ForceMode2D.Impulse);
-        }
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            //vi tri tao vien dan
-            Vector2 spwamPosition = transform.position;
-            //van toc vien dan
-            float bulletSpeed = 50f;
-            if (isFacingRight)
+            if (Input.GetKeyDown(KeyCode.Space) && isGround)
             {
-                spwamPosition += new Vector2(1, 0);
-                bulletSpeed = 50;
+                rb2D.AddForce(Vector2.up * lucNhay, ForceMode2D.Impulse);
             }
-            else
+            if (Input.GetKeyDown(KeyCode.E))
             {
-                spwamPosition += new Vector2(-1, 0);
-                bulletSpeed = -50;
+                //vi tri tao vien dan
+                Vector2 spwamPosition = transform.position;
+                //van toc vien dan
+                float bulletSpeed = 50f;
+                if (isFacingRight)
+                {
+                    spwamPosition += new Vector2(1, 0);
+                    bulletSpeed = 50;
+                }
+                else
+                {
+                    spwamPosition += new Vector2(-1, 0);
+                    bulletSpeed = -50;
+                }
+
+                GameObject Bullet = Instantiate(BulletPrefab,
+                                    spwamPosition, Quaternion.identity);
+                //lay component bomb
+                Bullet bulletComponent = Bullet.GetComponent<Bullet>();
+
+                bulletComponent.setSpeed(bulletSpeed);
             }
 
-            GameObject Bullet = Instantiate(BulletPrefab,
-                                spwamPosition, Quaternion.identity);
-            //lay component bomb
-            Bullet bulletComponent = Bullet.GetComponent<Bullet>();
 
-            bulletComponent.setSpeed(bulletSpeed);
         }
-
-
-    }
+    } 
 }
