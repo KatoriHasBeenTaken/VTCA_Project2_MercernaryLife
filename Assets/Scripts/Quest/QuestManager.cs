@@ -4,19 +4,38 @@ using UnityEngine;
 
 public class QuestManager : MonoBehaviour
 {
-    // Start is called before the first frame update
-    public List<Quest> activeQuests = new List<Quest>();
+    public static QuestManager Instance;
 
-    public void AddQuest(Quest newQuest)
+    private List<Quest> activeQuests = new List<Quest>();
+
+    private void Awake()
     {
-        activeQuests.Add(newQuest);
-        Debug.Log("Quest Added: " + newQuest.questName);
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
-    [System.Serializable]
-    public class Quest
+
+    public void AddQuest(Quest quest)
     {
-        public string questName;
-        public string description;
-        public bool isCompleted;
+        if (!activeQuests.Contains(quest))
+        {
+            activeQuests.Add(quest);
+            Debug.Log($"Quest '{quest.questName}' added to active quests.");
+        }
+    }
+
+    public void CompleteQuest(Quest quest)
+    {
+        if (activeQuests.Contains(quest))
+        {
+            quest.isCompleted = true;
+            Debug.Log($"Quest '{quest.questName}' completed!");
+        }
     }
 }

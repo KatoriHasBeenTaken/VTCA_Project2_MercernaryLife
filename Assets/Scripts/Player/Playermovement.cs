@@ -13,7 +13,7 @@ public class Playermovement : MonoBehaviour
     private bool isFacingRight = true;
     [SerializeField]
     private GameObject BulletPrefab;
-
+    private NpcInteraction ;
     public float lucNhay = 5f;
     [SerializeField] private Rigidbody2D rb2D;
     private bool isGround = false;
@@ -45,8 +45,19 @@ public class Playermovement : MonoBehaviour
     void Update()
     {
         InputManagement();
-
-    }
+        if (playerInRange && Input.GetKeyDown(KeyCode.E))
+        {
+            DialogueManager dialogueManager = FindObjectOfType<DialogueManager>();
+            if (dialogueManager.dialogueBox.activeSelf)
+            {
+                dialogueManager.DisplayNextSentence(); // Advance dialogue
+            }
+            else
+            {
+                GiveQuest();
+            }
+        
+        }
 
     void InputManagement()
     {
