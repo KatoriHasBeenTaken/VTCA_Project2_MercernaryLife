@@ -23,9 +23,9 @@ public class Bullet : MonoBehaviour
     {
         speed = newSpeed;
     }
-    private void OnCollisionEnter2D(Collision2D other)
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (other.gameObject.CompareTag("Ground"))
+        if (collision.gameObject.CompareTag("Player"))
         {
             Destroy(gameObject);
         }
