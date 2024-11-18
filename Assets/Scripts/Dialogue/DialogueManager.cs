@@ -5,57 +5,122 @@ using UnityEngine;
 
 public class DialogueManager : MonoBehaviour
 {
-    public Dialog initialDialog;  // Dialog before giving quest
-    public Quest quest;           // Quest associated with this NPC
+    public static DialogueManager Instance;
 
-    private bool playerInRange;
+    [Header("Dialogue UI")]
+    public GameObject dialogueUI; // Panel for dialogue
+    public Text speakerText; // Text for speaker's name
+    public Text dialogueText; // Text for dialogue lines
+    public Button continueButton; // Button to continue dialogue
 
-    private void OnTriggerEnter(Collider other)
+    private Dialog currentDialogue;
+    private int currentLineIndex = 0;
+
+    private void Awake()
     {
-        if (other.CompareTag("Player"))
+        if (Instance == null)
         {
-            playerInRange = true;
-            // Show interaction prompt (UI text like "Press E to interact")
-        }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            playerInRange = false;
-            // Hide interaction prompt
-        }
-    }
-
-    private void Update()
-    {
-        if (playerInRange && Input.GetKeyDown(KeyCode.E))
-        {
-            InteractWithPlayer();
-        }
-    }
-
-    private void InteractWithPlayer()
-    {
-        if (!quest.isCompleted)
-        {
-            ShowDialog(initialDialog);
-            // Give quest to the player
-            Debug.Log($"Quest '{quest.questName}' started!");
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
-            ShowDialog(quest.questDialog);
+            Destroy(gameObject);
+            return;
+        }
+
+        if (dialogueUI != null)
+        {
+            dialogueUI.SetActive(false); // Ensure the dialogue UI starts hidden
+        }
+
+        if (continueButton != null)
+        {
+            continueButton.onClick.RemoveAllListeners(); // Prevent duplicate listeners
+            continueButton.onClick.AddListener(ContinueDialogue);
         }
     }
 
-    private void ShowDialog(Dialog dialog)
+    /// <summary>
+    /// Starts a dialogue sequence.
+    /// </summary>
+    /// <param name="dialogue">The dialogue data to display.</param>
+    public void StartDialogue(Dialog dialogue)
     {
-        // Handle UI dialog system (e.g., showing dialog sentences one by one)
-        foreach (var sentence in dialog.sentences)
+        if (dialogue == null)
         {
-            Debug.Log(sentence); // Replace with UI display logic
+            Debug.LogWarning("DialogueManager: No dialogue data provided!");
+            return;
         }
+
+        currentDialogue = dialogue;
+        currentLineIndex = 0;
+
+        if (dialogueUI != null)
+        {
+            dialogueUI.SetActive(true);
+        }
+
+        DisplayNextLine();
+    }
+
+    /// <summary>
+    /// Continues to the next line of dialogue or ends the dialogue if complete.
+    /// </summary>
+    public void ContinueDialogue()
+    {
+        if (currentDialogue == null)
+        {
+            Debug.LogWarning("DialogueManager: No dialogue to continue!");
+            return;
+        }
+
+        if (currentLineIndex < currentDialogue.dialogueLines.Length - 1)
+        {
+            currentLineIndex++;
+            DisplayNextLine();
+        }
+        else
+        {
+            EndDialogue();
+        }
+    }
+
+    /// <summary>
+    /// Displays the current line of dialogue.
+    /// </summary>
+    private void DisplayNextLine()
+    {
+        if (currentDialogue == null || currentDialogue.dialogueLines.Length == 0)
+        {
+            Debug.LogWarning("DialogueManager: Dialogue is empty or null!");
+            EndDialogue();
+            return;
+        }
+
+        var line = currentDialogue.dialogueLines[currentLineIndex];
+        if (speakerText != null)
+        {
+            speakerText.text = line.speakerName;
+        }
+
+        if (dialogueText != null)
+        {
+            dialogueText.text = line.line;
+        }
+    }
+
+    /// <summary>
+    /// Ends the current dialogue sequence.
+    /// </summary>
+    public void EndDialogue()
+    {
+        if (dialogueUI != null)
+        {
+            dialogueUI.SetActive(false);
+        }
+
+        currentDialogue = null;
+        currentLineIndex = 0;
     }
 }

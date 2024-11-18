@@ -5,9 +5,11 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "NewQuest", menuName = "Game/Quest")]
 public class Quest : ScriptableObject
 {
-    public string questName;
-    [TextArea(3, 10)]
-    public string description;
-    public bool isCompleted;
-    public Dialog questDialog; // Dialog shown during/after the quest
+    public string questTitle;
+    [TextArea] public string questDescription;
+    public bool isQuestCompleted;
+
+    // Optional: Add rewards, objectives, or other data as needed
+    public int experienceReward;
+    public string objective;
 }

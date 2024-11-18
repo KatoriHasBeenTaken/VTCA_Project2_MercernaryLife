@@ -1,61 +1,48 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using static QuestManager;
 
 public class NpcInteraction : MonoBehaviour
 {
-    public Dialog initialDialog;  // Dialog before giving quest
-    public Quest quest;           // Quest associated with this NPC
+    [Header("Quest")]
+    public Quest questData;
 
-    private bool playerInRange;
+    [Header("Dialogue")]
+    public Dialog dialogueData;
 
-    private void OnTriggerEnter(Collider other)
+    private bool isPlayerNearby = false;
+
+    void Update()
     {
-        if (other.CompareTag("Player"))
+        if (isPlayerNearby && Input.GetKeyDown(KeyCode.E))
         {
-            playerInRange = true;
-            // Show interaction prompt (UI text like "Press E to interact")
+            if (dialogueData != null)
+            {
+                DialogueManager.Instance.StartDialogue(dialogueData);
+            }
+
+            if (questData != null && !questData.isQuestCompleted)
+            {
+                QuestManager.Instance.AddQuest(questData);
+            }
         }
     }
 
-    private void OnTriggerExit(Collider other)
+    void OnTriggerEnter2D(Collider2D collision)
     {
-        if (other.CompareTag("Player"))
+        if (collision.CompareTag("Player"))
         {
-            playerInRange = false;
-            // Hide interaction prompt
+            isPlayerNearby = true;
         }
     }
 
-    private void Update()
+    void OnTriggerExit2D(Collider2D collision)
     {
-        if (playerInRange && Input.GetKeyDown(KeyCode.E))
+        if (collision.CompareTag("Player"))
         {
-            InteractWithPlayer();
-        }
-    }
-
-    private void InteractWithPlayer()
-    {
-        if (!quest.isCompleted)
-        {
-            ShowDialog(initialDialog);
-            // Give quest to the player
-            Debug.Log($"Quest '{quest.questName}' started!");
-        }
-        else
-        {
-            ShowDialog(quest.questDialog);
-        }
-    }
-
-    private void ShowDialog(Dialog dialog)
-    {
-        // Handle UI dialog system (e.g., showing dialog sentences one by one)
-        foreach (var sentence in dialog.sentences)
-        {
-            Debug.Log(sentence); // Replace with UI display logic
+            isPlayerNearby = false;
         }
     }
 }

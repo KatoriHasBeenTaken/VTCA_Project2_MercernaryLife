@@ -5,10 +5,11 @@ using UnityEngine;
 public class Dialog : ScriptableObject
 {
     [System.Serializable]
-    public class Dialogue
+    public class DialogueLine
     {
-        public string npcName;
-        [TextArea(3, 10)]
-        public string[] sentences; // Array for multiple lines of dialogue.
+        public string speakerName; // Name of the NPC or player
+        [TextArea] public string line; // Dialogue line text
     }
+
+    public DialogueLine[] dialogueLines;
 }
